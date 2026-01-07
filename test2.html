@@ -78,10 +78,10 @@
             padding-bottom: 10px;
         }
         .desc-content {
-            font-size: 1.1em; /* 글자 크기를 조금 키워 발표 시 잘 보이게 함 */
+            font-size: 1.1em;
             line-height: 1.8;
             color: #444;
-            word-break: keep-all; /* 단어 단위 줄바꿈 */
+            word-break: keep-all;
         }
         .full-width {
             min-height: 600px;
@@ -93,6 +93,14 @@
             border-radius: 50%;
             margin-right: 5px;
             vertical-align: middle;
+        }
+        /* 동적 텍스트 강조 스타일 */
+        .highlight-text {
+            font-weight: bold;
+            color: #2c3e50;
+            background-color: #e8f5e9;
+            padding: 2px 5px;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -107,8 +115,8 @@
             <div id="sunburstChart" class="chart-box" style="flex: 3;"></div>
             
             <div class="chart-box desc-box">
-                <!-- 대본 스타일 설명 -->
-                <div class="desc-content">
+                <!-- id="dynamicDesc" 추가: 내용을 바꾸기 위한 이름표 -->
+                <div id="dynamicDesc" class="desc-content">
                     <p>이 그래프는 전체 점검 결과가 어떻게 구성되어 있는지 한눈에 보여줍니다.</p>
                     <p>원하는 상태를 클릭하면 상세 내용을 확인하실 수 있는데요,</p>
                     <p>
@@ -191,9 +199,71 @@
             marker: { colors: sbColors, line: {width: 2} },
         }], {
             margin: { t: 20, b: 20, l: 20, r: 20 },
-            font: { family: 'Noto Sans KR, Malgun Gothic' } // 폰트 적용
+            font: { family: 'Noto Sans KR, Malgun Gothic' }
         });
 
+        // ==========================================
+        // [NEW] 3. 클릭 이벤트 (설명 글 바꾸기)
+        // ==========================================
+        
+        // 초기 설명 글 저장
+        var dynamicDesc = document.getElementById('dynamicDesc');
+        var defaultDescHTML = dynamicDesc.innerHTML;
+
+        // 차트 클릭 감지
+        document.getElementById('sunburstChart').on('plotly_click', function(data) {
+            // 클릭된 정보 가져오기
+            var point = data.points[0];
+            var label = point.label; // 예: "긴급조치"
+            var value = point.value; // 예: 16
+            
+            // "전체"를 클릭하면 원래대로 복구
+            if (label === '전체' || label === 'Total') {
+                dynamicDesc.innerHTML = defaultDescHTML;
+                return;
+            }
+
+            // 하위 항목(자식) 찾기 로직
+            var childrenList = [];
+            for(var i=0; i<sbParents.length; i++) {
+                if(sbParents[i] === label) {
+                    childrenList.push({
+                        name: sbLabels[i],
+                        count: sbValues[i]
+                    });
+                }
+            }
+
+            // 대본 스타일의 문장 만들기
+            var html = "";
+            
+            // 1. 상태(부모)를 클릭했을 때
+            if (childrenList.length > 0) {
+                html += "<h3>👉 " + label + " 현황 분석</h3>";
+                html += "<p>선택하신 <span class='highlight-text'>" + label + "</span> 상태에 대해 말씀드리겠습니다.</p>";
+                html += "<p>전체 항목 중 <strong>총 " + value + "건</strong>이 해당 상태로 분류되었습니다.</p>";
+                html += "<p>구체적인 세부 항목을 살펴보면 다음과 같습니다.</p>";
+                html += "<ul style='margin-top:10px;'>";
+                childrenList.forEach(function(item) {
+                    html += "<li><strong>" + item.name + ":</strong> " + item.count + "건</li>";
+                });
+                html += "</ul>";
+            } 
+            // 2. 세부 항목(자식)을 클릭했을 때 (예: 긴급조치 안의 유효폭)
+            else {
+                html += "<h3>👉 세부 항목: " + label + "</h3>";
+                html += "<p>이 항목은 <span class='highlight-text'>" + point.parent + "</span> 상태에 속하는 <strong>" + label + "</strong> 데이터입니다.</p>";
+                html += "<p>해당되는 건수는 <strong>총 " + value + "건</strong>입니다.</p>";
+            }
+
+            html += "<p style='margin-top:20px; font-size:0.9em; color:#999;'>* 차트의 가운데 원을 클릭하시면 다시 전체 화면으로 돌아갑니다.</p>";
+
+            // 화면에 반영
+            dynamicDesc.innerHTML = html;
+        });
+
+
+        // Box Plots
         Plotly.newPlot('boxChartM', [{
             x: boxMX, y: boxMY, type: 'box', name: '데이터', boxpoints: 'all', jitter: 0.3, pointpos: -1.8, marker: { color: '#42A5F5' }
         }], {
