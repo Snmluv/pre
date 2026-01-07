@@ -13,7 +13,6 @@
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <style>
         body {
-            /* 폰트 적용 순서: Noto Sans KR(웹폰트) -> 맑은 고딕 -> 시스템 기본 */
             font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
             margin: 0;
             padding: 20px;
@@ -94,7 +93,6 @@
             margin-right: 5px;
             vertical-align: middle;
         }
-        /* 동적 텍스트 강조 스타일 */
         .highlight-text {
             font-weight: bold;
             color: #2c3e50;
@@ -115,13 +113,11 @@
             <div id="sunburstChart" class="chart-box" style="flex: 3;"></div>
             
             <div class="chart-box desc-box">
-                <!-- id="dynamicDesc" 추가: 내용을 바꾸기 위한 이름표 -->
                 <div id="dynamicDesc" class="desc-content">
-                    <p>이 그래프는 전체 점검 결과가 어떻게 구성되어 있는지 한눈에 보여줍니다.</p>
-                    <p>원하는 상태를 클릭하면 상세 내용을 확인하실 수 있는데요,</p>
-                    <p>
-                        예를 들어 <span class="badge" style="background:rgb(255, 200, 200)"></span><strong>긴급조치</strong>를 누르면, 
-                        유효폭 문제는 몇 건이고, 단차 문제는 몇 건인지 세부 항목들이 나옵니다.
+                    <!-- 초기 설명 글 없음 (빈 화면) 또는 기본 안내 -->
+                    <p style="color:#888; text-align:center;">
+                        👈 왼쪽 차트에서 <strong>'상태'</strong>나 <strong>'항목'</strong>을 클릭하면<br>
+                        상세한 분석 내용이 여기에 표시됩니다.
                     </p>
                 </div>
             </div>
@@ -196,6 +192,8 @@
             values: sbValues,
             branchvalues: "total",
             textinfo: "label+value+percent parent",
+            // [수정] 글자색을 검은색(#000)으로 강제 지정하여 잘 보이게 함
+            insidetextfont: { color: '#000000', size: 13 },
             marker: { colors: sbColors, line: {width: 2} },
         }], {
             margin: { t: 20, b: 20, l: 20, r: 20 },
@@ -203,27 +201,30 @@
         });
 
         // ==========================================
-        // [NEW] 3. 클릭 이벤트 (설명 글 바꾸기)
+        // 3. 클릭 이벤트 (설명 글 바꾸기 + 토글)
         // ==========================================
         
-        // 초기 설명 글 저장
         var dynamicDesc = document.getElementById('dynamicDesc');
-        var defaultDescHTML = dynamicDesc.innerHTML;
+        var lastClickedLabel = null; // 마지막으로 클릭한 라벨을 기억하는 변수
 
         // 차트 클릭 감지
         document.getElementById('sunburstChart').on('plotly_click', function(data) {
-            // 클릭된 정보 가져오기
             var point = data.points[0];
-            var label = point.label; // 예: "긴급조치"
-            var value = point.value; // 예: 16
+            var label = point.label; 
+            var value = point.value; 
             
-            // "전체"를 클릭하면 원래대로 복구
-            if (label === '전체' || label === 'Total') {
-                dynamicDesc.innerHTML = defaultDescHTML;
+            // [수정] 같은 곳을 두 번 클릭하거나(줌 아웃), '전체'를 클릭하면 글자 지우기
+            // 로직: 방금 클릭한 것과 같으면(이미 설명이 떠있는데 또 누름 = 줌아웃 의도) -> 초기화
+            if (label === '전체' || label === 'Total' || label === lastClickedLabel) {
+                dynamicDesc.innerHTML = "<p style='color:#888; text-align:center; margin-top:20px;'>👈 차트를 클릭하면 상세 설명이 나옵니다.</p>";
+                lastClickedLabel = null; // 클릭 상태 초기화
                 return;
             }
 
-            // 하위 항목(자식) 찾기 로직
+            // 새로운 클릭이 발생했으므로 lastClickedLabel 업데이트
+            lastClickedLabel = label;
+
+            // 하위 항목(자식) 찾기
             var childrenList = [];
             for(var i=0; i<sbParents.length; i++) {
                 if(sbParents[i] === label) {
@@ -234,7 +235,7 @@
                 }
             }
 
-            // 대본 스타일의 문장 만들기
+            // 대본 스타일 문장 생성
             var html = "";
             
             // 1. 상태(부모)를 클릭했을 때
@@ -249,16 +250,15 @@
                 });
                 html += "</ul>";
             } 
-            // 2. 세부 항목(자식)을 클릭했을 때 (예: 긴급조치 안의 유효폭)
+            // 2. 세부 항목(자식)을 클릭했을 때
             else {
                 html += "<h3>👉 세부 항목: " + label + "</h3>";
                 html += "<p>이 항목은 <span class='highlight-text'>" + point.parent + "</span> 상태에 속하는 <strong>" + label + "</strong> 데이터입니다.</p>";
                 html += "<p>해당되는 건수는 <strong>총 " + value + "건</strong>입니다.</p>";
             }
 
-            html += "<p style='margin-top:20px; font-size:0.9em; color:#999;'>* 차트의 가운데 원을 클릭하시면 다시 전체 화면으로 돌아갑니다.</p>";
+            html += "<p style='margin-top:20px; font-size:0.9em; color:#999;'>* 가운데를 클릭하면 다시 전체 화면으로 돌아갑니다.</p>";
 
-            // 화면에 반영
             dynamicDesc.innerHTML = html;
         });
 
