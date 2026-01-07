@@ -78,22 +78,21 @@
             padding-bottom: 10px;
         }
         .desc-content {
-            font-size: 0.95em;
-            line-height: 1.6;
-            color: #555;
-        }
-        .desc-content li {
-            margin-bottom: 8px;
+            font-size: 1.1em; /* 글자 크기를 조금 키워 발표 시 잘 보이게 함 */
+            line-height: 1.8;
+            color: #444;
+            word-break: keep-all; /* 단어 단위 줄바꿈 */
         }
         .full-width {
             min-height: 600px;
         }
         .badge {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             margin-right: 5px;
+            vertical-align: middle;
         }
     </style>
 </head>
@@ -108,20 +107,13 @@
             <div id="sunburstChart" class="chart-box" style="flex: 3;"></div>
             
             <div class="chart-box desc-box">
-                <!-- 제목 부분 삭제됨 -->
+                <!-- 대본 스타일 설명 -->
                 <div class="desc-content">
-                    <p>이 차트는 데이터의 <strong>전체적인 계층 구조</strong>를 보여줍니다.</p>
-                    <ul style="padding-left: 20px;">
-                        <li><strong>중심(안쪽):</strong> 전체 데이터의 시작점입니다.</li>
-                        <li><strong>중간 원:</strong> 점검 결과 상태를 나타냅니다.
-                            <br><span class="badge" style="background:rgb(200, 255, 200)"></span><strong>양호:</strong> 기준을 만족함
-                            <br><span class="badge" style="background:rgb(255, 255, 150)"></span><strong>개선(장기):</strong> 장기적 개선 필요
-                            <br><span class="badge" style="background:rgb(255, 200, 200)"></span><strong>긴급조치:</strong> 즉각적인 조치 필요
-                        </li>
-                        <li><strong>바깥 원:</strong> 각 상태에 해당하는 세부 항목(유효폭, 점자블록 등)의 비율입니다.</li>
-                    </ul>
-                    <p style="margin-top: 15px; font-size: 0.9em; color: #888;">
-                        * 차트의 특정 조각을 <strong>클릭</strong>하면 해당 항목을 확대하여 자세히 볼 수 있습니다.
+                    <p>이 그래프는 전체 점검 결과가 어떻게 구성되어 있는지 한눈에 보여줍니다.</p>
+                    <p>원하는 상태를 클릭하면 상세 내용을 확인하실 수 있는데요,</p>
+                    <p>
+                        예를 들어 <span class="badge" style="background:rgb(255, 200, 200)"></span><strong>긴급조치</strong>를 누르면, 
+                        유효폭 문제는 몇 건이고, 단차 문제는 몇 건인지 세부 항목들이 나옵니다.
                     </p>
                 </div>
             </div>
@@ -132,12 +124,11 @@
         <div class="chart-row">
             <div class="chart-box desc-box" style="flex: 1; min-height: 450px;">
                 <div class="desc-title">📏 수치 데이터 분석</div>
-                <div class="desc-content">
+                <div class="desc-content" style="font-size: 0.95em;">
                     <p>현장에서 측정된 실제 데이터값(유효폭, 높이, 각도)의 <strong>분포 범위</strong>를 보여줍니다.</p>
                     <ul style="padding-left: 20px;">
                         <li><strong>파란색 점:</strong> 각각의 실제 측정 지점들입니다.</li>
                         <li><strong>박스(네모):</strong> 데이터의 대다수(상위 25%~75%)가 모여있는 구간입니다.</li>
-                        <li><strong>세로선:</strong> 일반적인 데이터의 최대/최소 범위입니다.</li>
                     </ul>
                     <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
                     <p><strong>주요 확인 포인트:</strong></p>
