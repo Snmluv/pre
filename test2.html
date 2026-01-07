@@ -4,11 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>장애인 접근성 체크리스트 대시보드</title>
-    <!-- Plotly.js 라이브러리 (v2.35.2) -->
+    <!-- 1. 구글 웹 폰트 (Noto Sans KR) 추가 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Plotly.js 라이브러리 -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <style>
         body {
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            /* 폰트 적용 순서: Noto Sans KR(웹폰트) -> 맑은 고딕 -> 시스템 기본 */
+            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f0f2f5;
@@ -18,7 +24,7 @@
             text-align: center;
             color: #2c3e50;
             margin-bottom: 10px;
-            font-weight: 800;
+            font-weight: 700;
         }
         p.subtitle {
             text-align: center;
@@ -26,7 +32,7 @@
             margin-bottom: 40px;
         }
         .container {
-            max-width: 1400px; /* 설명 박스 추가로 폭을 넓힘 */
+            max-width: 1400px;
             margin: 0 auto;
         }
         .chart-section-title {
@@ -43,20 +49,19 @@
             flex-wrap: wrap;
             gap: 20px;
             margin-bottom: 30px;
-            align-items: stretch; /* 높이 맞춤 */
+            align-items: stretch;
         }
         .chart-box {
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             padding: 20px;
-            flex: 2; /* 차트는 넓게 */
+            flex: 2;
             min-width: 300px;
             min-height: 450px;
         }
-        /* 설명 박스 스타일 */
         .desc-box {
-            flex: 1; /* 설명은 좁게 */
+            flex: 1;
             background: linear-gradient(145deg, #ffffff, #f8f9fa);
             border: 1px solid #eee;
             display: flex;
@@ -83,7 +88,6 @@
         .full-width {
             min-height: 600px;
         }
-        /* 색상 뱃지 스타일 */
         .badge {
             display: inline-block;
             width: 10px;
@@ -101,12 +105,10 @@
         <!-- 섹션 1: 전체 계층 구조 -->
         <div class="chart-section-title">1. 전체 데이터 현황 (계층 구조)</div>
         <div class="chart-row">
-            <!-- 차트 영역 -->
             <div id="sunburstChart" class="chart-box" style="flex: 3;"></div>
             
-            <!-- [NEW] 설명 영역 (차트 옆) -->
             <div class="chart-box desc-box">
-                <div class="desc-title">💡 차트 읽는 법</div>
+                <!-- 제목 부분 삭제됨 -->
                 <div class="desc-content">
                     <p>이 차트는 데이터의 <strong>전체적인 계층 구조</strong>를 보여줍니다.</p>
                     <ul style="padding-left: 20px;">
@@ -128,7 +130,6 @@
         <!-- 섹션 2: 수치 데이터 상세 분석 -->
         <div class="chart-section-title">2. 항목별 측정 수치 상세 분석</div>
         <div class="chart-row">
-            <!-- [NEW] 설명 영역 (차트 그룹 옆) -->
             <div class="chart-box desc-box" style="flex: 1; min-height: 450px;">
                 <div class="desc-title">📏 수치 데이터 분석</div>
                 <div class="desc-content">
@@ -148,7 +149,6 @@
                 </div>
             </div>
 
-            <!-- 차트들 -->
             <div id="boxChartM" class="chart-box"></div>
             <div id="boxChartCm" class="chart-box"></div>
             <div id="boxChartDeg" class="chart-box"></div>
@@ -160,16 +160,14 @@
         // 1. 데이터 정의
         // ==========================================
         
-        // [선버스트 차트용 데이터]
         var sbLabels = ["전체", "양호", "유효폭", "점자블록", "건물 진입로", "기울기/단차", "포장상태", "개선(장기)", "건물 진입로", "기울기/단차", "점자블록", "긴급조치", "유효폭", "포장상태", "기울기/단차", "점자블록", "건물 진입로"];
         var sbParents = ["", "전체", "양호", "양호", "양호", "양호", "양호", "전체", "개선(장기)", "개선(장기)", "개선(장기)", "전체", "긴급조치", "긴급조치", "긴급조치", "긴급조치", "긴급조치"];
         var sbValues = [166, 117, 56, 24, 19, 14, 4, 33, 23, 8, 2, 16, 6, 5, 2, 2, 1];
 
-        // 색상 매핑
         var statusColors = {
-            "양호": "rgb(200, 255, 200)",      // 연한 초록
-            "개선(장기)": "rgb(255, 255, 150)", // 연한 노랑
-            "긴급조치": "rgb(255, 200, 200)"   // 연한 빨강
+            "양호": "rgb(200, 255, 200)",
+            "개선(장기)": "rgb(255, 255, 150)",
+            "긴급조치": "rgb(255, 200, 200)"
         };
 
         var sbColors = sbLabels.map(function(label, i) {
@@ -180,22 +178,18 @@
             return "#eeeeee";
         });
 
-        // [박스 플롯용 데이터]
+        // Box Plot Data
         var boxMX = ["유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "건물 진입로", "건물 진입로", "유효폭", "유효폭", "유효폭", "건물 진입로", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "건물 진입로", "유효폭", "건물 진입로", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "건물 진입로", "건물 진입로", "건물 진입로", "건물 진입로", "유효폭", "유효폭", "유효폭", "유효폭", "건물 진입로", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "유효폭", "건물 진입로", "유효폭"];
         var boxMY = [3.6, 2.4, 1.5, 1.2, 9.0, 3.7, 2.3, 2.3, 1.9, 3.4, 2.9, 1.5, 1.5, 4.3, 1.5, 1.9, 2.2, 4.5, 1.5, 1.5, 3.6, 2.0, 10.0, 0.9, 1.4, 1.3, 1.4, 1.6, 1.5, 1.5, 4.5, 3.7, 1.3, 4.3, 1.5, 1.5, 1.8, 1.8, 0.8, 2.1, 3.8, 4.1, 6.9, 5.3, 1.1, 1.3, 2.2, 4.5, 4.1, 3.6, 3.2, 1.1, 1.1, 1.8, 3.7, 4.1, 1.6, 1.8, 3.0, 1.7, 5.3, 2.2, 1.8, 1.7, 1.6, 5.7, 4.0, 1.1, 1.6, 2.4, 5.1, 1.9, 1.5];
-        
         var boxCmX = ["포장상태", "건물 진입로", "건물 진입로", "건물 진입로", "건물 진입로", "건물 진입로", "건물 진입로", "기울기/단차", "기울기/단차", "건물 진입로", "건물 진입로", "기울기/단차", "건물 진입로", "기울기/단차", "기울기/단차", "건물 진입로", "건물 진입로"];
         var boxCmY = [0.1, 3.5, 5.8, 18.0, 21.0, 18.0, 4.0, 1.0, 2.1, 1.5, 14.0, 3.5, 11.5, 2.5, 3.3, 18.0, 18.0];
-        
         var boxDegX = ["기울기/단차", "기울기/단차", "건물 진입로", "기울기/단차", "건물 진입로", "건물 진입로", "기울기/단차", "건물 진입로", "건물 진입로", "기울기/단차", "기울기/단차", "기울기/단차", "기울기/단차", "기울기/단차", "건물 진입로", "기울기/단차", "기울기/단차", "기울기/단차", "건물 진입로", "기울기/단차", "기울기/단차", "기울기/단차", "건물 진입로", "건물 진입로", "건물 진입로", "건물 진입로", "건물 진입로", "건물 진입로", "기울기/단차", "건물 진입로", "건물 진입로", "건물 진입로", "건물 진입로", "기울기/단차", "건물 진입로", "건물 진입로", "기울기/단차", "건물 진입로", "건물 진입로", "기울기/단차"];
         var boxDegY = [2.4, 3.6, 4.8, 2.2, 9.7, 7.9, 1.4, 7.3, 8.8, 9.2, 6.7, 3.6, 4.5, 5.4, 16.8, 7.8, 6.7, 4.5, 7.0, 9.1, 3.7, 8.0, 3.5, 3.6, 3.6, 2.7, 3.5, 1.4, 5.9, 6.6, 16.0, 7.7, 4.0, 7.6, 1.0, 2.2, 8.0, 8.6, 26.0, 10.1];
-
 
         // ==========================================
         // 2. 차트 그리기
         // ==========================================
 
-        // [차트 1] Sunburst Chart
         Plotly.newPlot('sunburstChart', [{
             type: "sunburst",
             labels: sbLabels,
@@ -203,66 +197,35 @@
             values: sbValues,
             branchvalues: "total",
             textinfo: "label+value+percent parent",
-            marker: {
-                colors: sbColors,
-                line: {width: 2}
-            },
+            marker: { colors: sbColors, line: {width: 2} },
         }], {
             margin: { t: 20, b: 20, l: 20, r: 20 },
-            font: { family: 'Malgun Gothic' } // 폰트 통일
+            font: { family: 'Noto Sans KR, Malgun Gothic' } // 폰트 적용
         });
 
-        // [차트 2] Box Plot - m
         Plotly.newPlot('boxChartM', [{
-            x: boxMX,
-            y: boxMY,
-            type: 'box',
-            name: '데이터',
-            boxpoints: 'all',
-            jitter: 0.3,
-            pointpos: -1.8,
-            marker: { color: '#42A5F5' }
+            x: boxMX, y: boxMY, type: 'box', name: '데이터', boxpoints: 'all', jitter: 0.3, pointpos: -1.8, marker: { color: '#42A5F5' }
         }], {
-            title: '<b>📏 길이/폭 (m)</b>',
-            yaxis: { title: '미터 (m)' },
+            title: '<b>📏 길이/폭 (m)</b>', yaxis: { title: '미터 (m)' },
             margin: { t: 40, b: 40, l: 30, r: 20 },
-            font: { family: 'Malgun Gothic' }
+            font: { family: 'Noto Sans KR, Malgun Gothic' }
         });
 
-        // [차트 3] Box Plot - cm
         Plotly.newPlot('boxChartCm', [{
-            x: boxCmX,
-            y: boxCmY,
-            type: 'box',
-            name: '데이터',
-            boxpoints: 'all',
-            jitter: 0.3,
-            pointpos: -1.8,
-            marker: { color: '#AB47BC' }
+            x: boxCmX, y: boxCmY, type: 'box', name: '데이터', boxpoints: 'all', jitter: 0.3, pointpos: -1.8, marker: { color: '#AB47BC' }
         }], {
-            title: '<b>📐 단차/높이 (cm)</b>',
-            yaxis: { title: '센티미터 (cm)' },
+            title: '<b>📐 단차/높이 (cm)</b>', yaxis: { title: '센티미터 (cm)' },
             margin: { t: 40, b: 40, l: 30, r: 20 },
-            font: { family: 'Malgun Gothic' }
+            font: { family: 'Noto Sans KR, Malgun Gothic' }
         });
 
-        // [차트 4] Box Plot - 도
         Plotly.newPlot('boxChartDeg', [{
-            x: boxDegX,
-            y: boxDegY,
-            type: 'box',
-            name: '데이터',
-            boxpoints: 'all',
-            jitter: 0.3,
-            pointpos: -1.8,
-            marker: { color: '#FF7043' }
+            x: boxDegX, y: boxDegY, type: 'box', name: '데이터', boxpoints: 'all', jitter: 0.3, pointpos: -1.8, marker: { color: '#FF7043' }
         }], {
-            title: '<b>📐 경사/기울기 (도)</b>',
-            yaxis: { title: '각도 (Degree)' },
+            title: '<b>📐 경사/기울기 (도)</b>', yaxis: { title: '각도 (Degree)' },
             margin: { t: 40, b: 40, l: 30, r: 20 },
-            font: { family: 'Malgun Gothic' }
+            font: { family: 'Noto Sans KR, Malgun Gothic' }
         });
-
     </script>
 </body>
 </html>
