@@ -114,7 +114,6 @@
             
             <div class="chart-box desc-box">
                 <div id="dynamicDesc" class="desc-content">
-                    <!-- 초기 설명 글 없음 (빈 화면) 또는 기본 안내 -->
                     <p style="color:#888; text-align:center;">
                         👈 왼쪽 차트에서 <strong>'상태'</strong>나 <strong>'항목'</strong>을 클릭하면<br>
                         상세한 분석 내용이 여기에 표시됩니다.
@@ -192,39 +191,29 @@
             values: sbValues,
             branchvalues: "total",
             textinfo: "label+value+percent parent",
-            // [수정] 글자색을 검은색(#000)으로 강제 지정하여 잘 보이게 함
             insidetextfont: { color: '#000000', size: 13 },
             marker: { colors: sbColors, line: {width: 2} },
         }], {
             margin: { t: 20, b: 20, l: 20, r: 20 },
             font: { family: 'Noto Sans KR, Malgun Gothic' }
-        });
+        }, { displaylogo: false }); 
 
-        // ==========================================
-        // 3. 클릭 이벤트 (설명 글 바꾸기 + 토글)
-        // ==========================================
-        
         var dynamicDesc = document.getElementById('dynamicDesc');
-        var lastClickedLabel = null; // 마지막으로 클릭한 라벨을 기억하는 변수
+        var lastClickedLabel = null;
 
-        // 차트 클릭 감지
         document.getElementById('sunburstChart').on('plotly_click', function(data) {
             var point = data.points[0];
             var label = point.label; 
             var value = point.value; 
             
-            // [수정] 같은 곳을 두 번 클릭하거나(줌 아웃), '전체'를 클릭하면 글자 지우기
-            // 로직: 방금 클릭한 것과 같으면(이미 설명이 떠있는데 또 누름 = 줌아웃 의도) -> 초기화
             if (label === '전체' || label === 'Total' || label === lastClickedLabel) {
                 dynamicDesc.innerHTML = "<p style='color:#888; text-align:center; margin-top:20px;'>👈 차트를 클릭하면 상세 설명이 나옵니다.</p>";
-                lastClickedLabel = null; // 클릭 상태 초기화
+                lastClickedLabel = null;
                 return;
             }
 
-            // 새로운 클릭이 발생했으므로 lastClickedLabel 업데이트
             lastClickedLabel = label;
 
-            // 하위 항목(자식) 찾기
             var childrenList = [];
             for(var i=0; i<sbParents.length; i++) {
                 if(sbParents[i] === label) {
@@ -235,12 +224,10 @@
                 }
             }
 
-            // 대본 스타일 문장 생성
             var html = "";
-            
-            // 1. 상태(부모)를 클릭했을 때
             if (childrenList.length > 0) {
                 html += "<h3>👉 " + label + " 현황 분석</h3>";
+                // [수정됨] 말씀드리겠습니다 -> 안내드리겠습니다
                 html += "<p>선택하신 <span class='highlight-text'>" + label + "</span> 상태에 대해 안내드리겠습니다.</p>";
                 html += "<p>전체 항목 중 <strong>총 " + value + "건</strong>이 해당 상태로 분류되었습니다.</p>";
                 html += "<p>구체적인 세부 항목을 살펴보면 다음과 같습니다.</p>";
@@ -250,7 +237,6 @@
                 });
                 html += "</ul>";
             } 
-            // 2. 세부 항목(자식)을 클릭했을 때
             else {
                 html += "<h3>👉 세부 항목: " + label + "</h3>";
                 html += "<p>이 항목은 <span class='highlight-text'>" + point.parent + "</span> 상태에 속하는 <strong>" + label + "</strong> 데이터입니다.</p>";
@@ -270,7 +256,7 @@
             title: '<b>📏 길이/폭 (m)</b>', yaxis: { title: '미터 (m)' },
             margin: { t: 40, b: 40, l: 30, r: 20 },
             font: { family: 'Noto Sans KR, Malgun Gothic' }
-        });
+        }, { displaylogo: false });
 
         Plotly.newPlot('boxChartCm', [{
             x: boxCmX, y: boxCmY, type: 'box', name: '데이터', boxpoints: 'all', jitter: 0.3, pointpos: -1.8, marker: { color: '#AB47BC' }
@@ -278,7 +264,7 @@
             title: '<b>📐 단차/높이 (cm)</b>', yaxis: { title: '센티미터 (cm)' },
             margin: { t: 40, b: 40, l: 30, r: 20 },
             font: { family: 'Noto Sans KR, Malgun Gothic' }
-        });
+        }, { displaylogo: false });
 
         Plotly.newPlot('boxChartDeg', [{
             x: boxDegX, y: boxDegY, type: 'box', name: '데이터', boxpoints: 'all', jitter: 0.3, pointpos: -1.8, marker: { color: '#FF7043' }
@@ -286,8 +272,7 @@
             title: '<b>📐 경사/기울기 (도)</b>', yaxis: { title: '각도 (Degree)' },
             margin: { t: 40, b: 40, l: 30, r: 20 },
             font: { family: 'Noto Sans KR, Malgun Gothic' }
-        });
+        }, { displaylogo: false });
     </script>
 </body>
 </html>
-
